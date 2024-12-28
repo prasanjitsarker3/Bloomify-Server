@@ -1,0 +1,153 @@
+
+generator client {
+  provider = "prisma-client-js"
+}
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id String @id @default(uuid())
+  name String
+  email String @unique
+  password String
+  role UserRole @default(user)
+  needPasswordChange Boolean @default(true)
+  profile String ?
+  number String ?
+  location String ?
+  otp String ?
+  otpExpires String?
+  isVerified Boolean @default(false)
+  order Int @default(0)
+  status UserStatus @default(ACTIVE)
+  createdAt DateTime @default(now())
+  updateAt DateTime @updatedAt
+  orders Order[]
+
+  @@map("users")
+}
+
+model Banner {
+  id String @id @default(uuid())
+  name String ?
+  img String
+  type  BannerType @default(banner)
+  createdAt DateTime @default(now())
+  updateAt DateTime @updatedAt
+  @@map("banners")
+}
+model Category {
+  id String @id @default(uuid())
+  name String @unique
+  img String
+  isDeleted Boolean @default(false)
+  products  Product[] 
+  createdAt DateTime @default(now())
+  updateAt DateTime @updatedAt
+  @@map("categories")
+}
+
+model Product {
+  id String @id @default(uuid())
+  name String
+  price        Float 
+  discount     Float       @default(0)  
+  totalProduct Int         @default(0)
+  size         String[]
+  type         Gender      @default(Man)
+  photo        Photo[]
+  sold         Int @default(0)
+  categoryId   String
+  isDelete     Boolean @default(false)
+  category     Category    @relation(fields: [categoryId], references: [id])
+  rating       Int @default(0)
+  description  String?
+  details     String?
+  discussion String?
+  orderItems  OrderProduct[] 
+  createdAt    DateTime    @default(now())
+  updateAt     DateTime    @updatedAt
+  
+  @@map("products")
+
+}
+
+model Photo {
+  id        String   @id @default(uuid())
+  img       String
+  isDeleted Boolean  @default(false)
+  productId String  
+  product   Product  @relation(fields: [productId], references: [id])
+
+  @@map("photos")
+}
+
+model Order {
+  id             String         @id @default(uuid())
+  name           String
+  address        String
+  contact        String
+  note           String?
+  deliveryCharge Float?        
+  totalPrice     Float
+  discountNow          Int @default(0)
+  isDeleted      Boolean        @default(false)
+  isPdf          Boolean        @default(false)
+  status         OrderStatus    @default(PENDING)
+  createdAt      DateTime       @default(now())
+  updateAt       DateTime       @updatedAt
+  orderItems     OrderProduct[] 
+
+// Relation with User
+  userId         String
+  user           User           @relation(fields: [userId], references: [id]) 
+  
+
+  @@map("orders")
+}
+
+model OrderProduct {
+  id        String   @id @default(uuid())
+  quantity  Int
+  size      String
+  orderId   String
+  productId String
+  order     Order    @relation(fields: [orderId], references: [id])
+  product   Product  @relation(fields: [productId], references: [id])
+  isDeleted Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updateAt  DateTime @updatedAt
+  @@unique([orderId, productId]) 
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIFM
+  DELIVERY
+  REJECTED
+  RETURN
+}
+
+
+enum UserStatus {
+  ACTIVE
+  BLOCKED
+  DELETED
+}
+enum UserRole {
+  admin
+  user
+} 
+
+enum Gender {
+  Man
+  Woman
+}
+
+enum BannerType {
+  banner
+  add
+}
+

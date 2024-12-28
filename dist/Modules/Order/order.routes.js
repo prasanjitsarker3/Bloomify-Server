@@ -1,0 +1,24 @@
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.orderRoutes = void 0;
+const express_1 = __importDefault(require("express"));
+const orderController_1 = require("./orderController");
+const auth_1 = __importDefault(require("../../Middleware/auth"));
+const client_1 = require("@prisma/client");
+const router = express_1.default.Router();
+router.get("", (0, auth_1.default)(client_1.UserRole.admin, client_1.UserRole.user), orderController_1.orderController.getAllOrders);
+router.get("/adminOrder", (0, auth_1.default)(client_1.UserRole.admin, client_1.UserRole.user), orderController_1.orderController.getAllOrdersForAdmin);
+router.get("/confirmOrder", (0, auth_1.default)(client_1.UserRole.admin, client_1.UserRole.user), orderController_1.orderController.getConfirmOrders);
+router.get("/deliveryOrder", (0, auth_1.default)(client_1.UserRole.admin, client_1.UserRole.user), orderController_1.orderController.getDeliveryOrders);
+router.get("/returnOrder", (0, auth_1.default)(client_1.UserRole.admin, client_1.UserRole.user), orderController_1.orderController.getAllReturnOrder);
+router.get("/:productId", (0, auth_1.default)(client_1.UserRole.admin, client_1.UserRole.user), orderController_1.orderController.getSingleOrder);
+router.post("/create", orderController_1.orderController.createOrder);
+router.post("/create-check-sessions", orderController_1.orderController.onlineOrder);
+router.patch("/updateDiscount", (0, auth_1.default)(client_1.UserRole.user, client_1.UserRole.admin), orderController_1.orderController.getDeliveryAndPrice);
+router.patch("/:orderId", (0, auth_1.default)(client_1.UserRole.admin, client_1.UserRole.user), orderController_1.orderController.updateOrderStatus);
+router.patch("/pdf/:pdfId", (0, auth_1.default)(client_1.UserRole.admin, client_1.UserRole.user), orderController_1.orderController.pdfDownload);
+router.delete("/:orderProductId", (0, auth_1.default)(client_1.UserRole.admin, client_1.UserRole.user), orderController_1.orderController.deleteOrder);
+exports.orderRoutes = router;
